@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>王总生日快乐 🎆🎂</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(circle at top, #1b2735, #090a0f);
+    color: #fff;
+    overflow: hidden;
+  }
+
+  /* 星空 & 烟花画布 */
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  /* 中间礼物盒 */
+  .center {
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+    top: 38%;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .gift-wrapper {
+    display: inline-block;
+    pointer-events: auto;
+  }
+
+  .gift {
+    width: 140px;
+    height: 120px;
+    position: relative;
+    cursor: pointer;
+    animation: float 2.4s ease-in-out infinite;
+  }
+
+  .gift-box {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(135deg, #ff5f6d, #ffc371);
+    border-radius: 8px;
+  }
+
+  .gift-lid {
+    position: absolute;
+    top: 0;
+    left: -6px;
+    width: 152px;
+    height: 40px;
+    background: linear-gradient(135deg, #ff9966, #ff5e62);
+    border-radius: 8px 8px 3px 3px;
+    transform-origin: bottom center;
+    transition: transform 0.5s ease, top 0.5s ease;
+  }
+
+  .gift-ribbon-vertical {
+    position: absolute;
+    left: 50%;
+    top: -4px;
+    width: 18px;
+    height: 124px;
+    background: rgba(255,255,255,0.85);
+    transform: translateX(-50%);
+    border-radius: 999px;
+  }
+
+  .gift-ribbon-horizontal {
+    position: absolute;
+    left: 0;
+    bottom: 32px;
+    width: 100%;
+    height: 18px;
+    background: rgba(255,255,255,0.85);
+  }
+
+  .gift-text {
+    position: absolute;
+    width: 100%;
+    bottom: -36px;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .tip {
+    margin-top: 60px;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* 打开后的礼物动画 */
+  .gift.opened {
+    animation: none;
+    transform: translateY(-6px) scale(1.03);
+  }
+  .gift.opened .gift-lid {
+    top: -26px;
+    transform: translateY(-8px) rotate(-18deg);
+  }
+
+  /* 爱心粒子容器 */
+  .hearts {
+    position: absolute;
+    left: 50%;
+    top: -10px;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .heart {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #ff9ecb;
+    transform: rotate(45deg);
+    animation: heartFloat 2.4s ease-out forwards;
+  }
+  .heart::before, .heart::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #ff9ecb;
+    border-radius: 50%;
+  }
+  .heart::before { top: -7px; left: 0; }
+  .heart::after  { left: -7px; top: 0; }
+
+  @keyframes heartFloat {
+    0% { transform: translate3d(0,0,0) rotate(45deg); opacity: 1; }
+    100% { transform: translate3d(0,-60px,0) rotate(45deg); opacity: 0; }
+  }
+
+  /* 弹窗 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+  .hidden { display: none; }
+
+  .content {
+    background: #fffaf4;
+    color: #333;
+    width: 82%;
+    max-width: 380px;
+    border-radius: 22px;
+    padding: 26px 22px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .content::before {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    background:
+      radial-gradient(circle at top left, #ffe1f0 0, transparent 55%),
+      radial-gradient(circle at bottom right, #ffe7c9 0, transparent 55%);
+    opacity: 0.85;
+    z-index: -1;
+  }
+
+  .close {
+    position: absolute;
+    right: 14px;
+    top: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+  }
+
+  .cake { font-size: 42px; margin-bottom: 6px; }
+  h2 { font-size: 20px; margin-bottom: 8px; }
+
+  .wish {
+    margin-top: 4px;
+    color: #444;
+    line-height: 1.8;
+    white-space: pre-line;
+  }
+
+  .from {
+    margin-top: 12px;
+    color: #666;
+    text-align: right;
+    font-size: 12px;
+  }
+
+  .music-hint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #999;
+  }
+
+  @media (max-width: 420px) {
+    .gift {
+      width: 120px;
+      height: 110px;
+    }
+    .gift-lid { width: 132px; left: -6px; }
+  }
+</style>
+</head>
+
+<body>
+<!-- 星空 + 烟花画布 -->
+<canvas id="canvas"></canvas>
+
+<!-- 中间礼物盒 -->
+<div class="center">
+  <div class="gift-wrapper">
+    <div class="gift" id="giftBox">
+      <div class="gift-lid"></div>
+      <div class="gift-box"></div>
+      <div class="gift-ribbon-vertical"></div>
+      <div class="gift-ribbon-horizontal"></div>
+      <div class="hearts" id="heartsContainer"></div>
+      <div class="gift-text">点击拆礼物 🎁</div>
+    </div>
+  </div>
+  <div class="tip">为王总准备的专属生日星空 ✨</div>
+</div>
+
+<!-- 生日祝福弹窗 -->
+<div class="modal hidden" id="modal">
+  <div class="content">
+    <div class="close" id="closeBtn">×</div>
+    <div class="cake">🎉🎂✨</div>
+    <h2>王总，生日快乐！</h2>
+    <div class="wish">
+愿今晚的星空替我为你点亮每一束烟花，  
+愿所有的辛苦都有回甘，所有的期待都有答案。  
+
+愿你事业有成、生活有趣、身边有爱，  
+被温柔以待，也学会温柔地对自己。  
+
+新的一岁，请继续发光发热，  
+世界会因为你的存在而更好一点。✨
+    </div>
+    <div class="from">—— 来自 小陈小陈</div>
+    <div class="music-hint">若没听到音乐，可轻点屏幕一次重新激活哦 🎧</div>
+  </div>
+</div>
+
+<!-- 背景音乐（把 your-music.mp3 换成你自己的歌曲地址） -->
+<audio id="bgm" loop>
+  <source src="your-music.mp3" type="audio/mpeg" />
+</audio>
+
+<script>
+/* ============ 礼物盒 + 弹窗 + 音乐 ============ */
+const giftBox = document.getElementById("giftBox");
+const modal   = document.getElementById("modal");
+const closeBtn = document.getElementById("closeBtn");
+const bgm = document.getElementById("bgm");
+const heartsContainer = document.getElementById("heartsContainer");
+
+// 生成爱心小粒子
+function createHeart() {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.style.left = (Math.random() * 40 - 20) + "px";
+  heartsContainer.appendChild(heart);
+  setTimeout(() => heart.remove(), 2400);
+}
+
+// 拆礼物
+function openGift() {
+  giftBox.classList.add("opened");
+  modal.classList.remove("hidden");
+  // 播放音乐（部分手机需要用户交互，这里已经属于点击事件）
+  if (bgm) {
+    bgm.play().catch(()=>{ /* 静默失败 */ });
+  }
+  // 连续一段时间冒爱心
+  for (let i = 0; i < 12; i++) {
+    setTimeout(createHeart, i * 200);
+  }
+}
+
+giftBox.addEventListener("click", openGift);
+closeBtn.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
+
+// 额外点击屏幕后尝试重新播放音乐（防止微信第一次屏蔽自动播放）
+document.addEventListener("touchstart", () => {
+  if (bgm && bgm.paused) bgm.play().catch(()=>{});
+}, { once: true });
+
+/* ============ 星空 + 烟花动画 ============ */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let w, h;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+// 星星
+const stars = [];
+for (let i = 0; i < 120; i++) {
+  stars.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 1.2 + 0.3,
+    alpha: Math.random(),
+    speed: Math.random() * 0.02 + 0.005
+  });
+}
+
+// 烟花
+const fireworks = [];
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+class Firework {
+  constructor() {
+    this.x = random(w * 0.1, w * 0.9);
+    this.y = h;
+    this.speed = random(3, 6);
+    this.targetY = random(h * 0.15, h * 0.5);
+    this.color = `hsl(${random(0,360)},100%,60%)`;
+    this.exploded = false;
+    this.particles = [];
+  }
+
+  explode() {
+    const count = 40;
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x: this.x,
+        y: this.y,
+        alpha: 1,
+        radius: random(1.5, 3.5),
+        angle: random(0, Math.PI * 2),
+        speed: random(1, 4),
+        color: this.color
+      });
+    }
+    this.exploded = true;
+  }
+
+  update() {
+    if (!this.exploded) {
+      this.y -= this.speed;
+      if (this.y <= this.targetY) this.explode();
+    } else {
+      this.particles.forEach(p => {
+        p.x += Math.cos(p.angle) * p.speed;
+        p.y += Math.sin(p.angle) * p.speed + 0.04; // 轻微下坠
+        p.alpha -= 0.018;
+      });
+      this.particles = this.particles.filter(p => p.alpha > 0);
+    }
+  }
+
+  draw() {
+    if (!this.exploded) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    } else {
+      this.particles.forEach(p => {
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+function drawStars() {
+  stars.forEach(s => {
+    s.alpha += s.speed * (Math.random() > 0.5 ? 1 : -1);
+    if (s.alpha < 0.1) s.alpha = 0.1;
+    if (s.alpha > 1) s.alpha = 1;
+    ctx.globalAlpha = s.alpha;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function loop() {
+  // 夜空背景
+  ctx.fillStyle = "rgba(5, 8, 20, 0.6)";
+  ctx.fillRect(0, 0, w, h);
+
+  drawStars();
+
+  // 适量生成烟花
+  if (Math.random() < 0.045) {
+    fireworks.push(new Firework());
+  }
+
+  fireworks.forEach((fw, i) => {
+    fw.update();
+    fw.draw();
+    if (fw.exploded && fw.particles.length === 0) fireworks.splice(i, 1);
+  });
+
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
